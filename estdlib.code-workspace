@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"compare": "c",
+			"tuple": "c",
+			"type_traits": "c",
+			"utility": "c",
+			"xmemory": "c",
+			"xtr1common": "c",
+			"xutility": "c",
+			"stdlib.h": "c",
+			"list": "c",
+			"stdbool.h": "c"
+		},
+		"cSpell.words": [
+			"ESTD"
+		]
+	}
+}
