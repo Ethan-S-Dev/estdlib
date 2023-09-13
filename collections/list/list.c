@@ -2,59 +2,60 @@
 #include <string.h>
 
 #define list_header(list) ((_list_header*)(list) - 1)
-#define list_items(list) ((byte*)(_list_header*)(list) + 1)
+#define list_items(list) ((byte*)((_list_header*)(list) + 1))
 
-typedef struct _list_header{
+typedef struct _list_header {
     size_t item_size;
     size_t length;
     size_t capacity;
 } _list_header;
 
-list_t* estd_list_create(size_t capacity, size_t item_size){
-    if(capacity == 0)
+list_t* estd_list_create(size_t capacity, size_t item_size) {
+    if (capacity == 0)
         capacity = LIST_INIT_CAPACITY;
 
-    _list_header* header = ESTD_MALLOC(sizeof(_list_header) + (capacity* item_size));
+    _list_header* header = ESTD_MALLOC(sizeof(_list_header) + (capacity * item_size));
     header->capacity = capacity;
     header->item_size = item_size;
     header->length = 0;
     return list_items(header);
 }
 
-void estd_list_destroy(list_t* list){
+void estd_list_destroy(list_t* list) {
     _list_header* header = list_header(list);
     ESTD_FREE(header);
 }
 
-bool estd_list_grow(list_t** list_p, size_t size){
+bool estd_list_grow(list_t** list_p, size_t size) {
     _list_header* header = list_header(*list_p);
 
-    if(header->capacity > header->length)
+    if (header->capacity > header->length)
         return true;
 
     size_t needed_capacity = header->length + size;
 
-    if(needed_capacity <= LIST_GROWTH_FACTOR * header->capacity)
+    if (needed_capacity <= LIST_GROWTH_FACTOR * header->capacity)
         needed_capacity = LIST_GROWTH_FACTOR * header->capacity;
-    else if(needed_capacity < LIST_INIT_CAPACITY)
+    else if (needed_capacity < LIST_INIT_CAPACITY)
         needed_capacity = LIST_INIT_CAPACITY;
 
-    _list_header* new_header = ESTD_REALLOC(header, needed_capacity);
+    _list_header* new_header = ESTD_REALLOC(header, sizeof(_list_header) + (needed_capacity * header->item_size));
 
-    if(new_header == NULL)
+    if (new_header == NULL)
         return false;
 
-    ESTD_FREE(header);
+    new_header->capacity = needed_capacity;
+
     *list_p = list_items(new_header);
 
     return true;
 }
 
-bool estd_list_remove(list_t* list, size_t index){
+bool estd_list_remove(list_t* list, size_t index) {
     _list_header* header = list_header(list);
     byte* _list = list_items(header);
 
-    if(header->length <= index)
+    if (header->length <= index)
         return false;
 
     size_t list_bytes_size = (header->length * header->item_size);
@@ -63,13 +64,21 @@ bool estd_list_remove(list_t* list, size_t index){
     size_t next_item_bytes_index = item_bytes_index + header->item_size;
 
     for (size_t i = next_item_bytes_index; i < list_bytes_size; i++)
-       _list[i - 1] = _list[i];
-    
+        _list[i - header->item_size] = _list[i];
+
     header->length--;
     return true;
 }
 
-size_t estd_list_len(list_t* list){
+size_t estd_list_len(list_t* list) {
     _list_header* header = list_header(list);
     return header->length;
 }
+
+size_t estd_list_len_grow(list_t* list, size_t size) {
+    size_t current_length = estd_list_len(list);
+    _list_header* header = list_header(list);
+    header->length++;
+    return current_length;
+}
+

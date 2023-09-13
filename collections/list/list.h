@@ -16,7 +16,7 @@
 #define list_create_cap(type, capacity) ((type *)estd_list_create((capacity), sizeof(type)))
 #define list_create(type) ((type *)estd_list_create(LIST_INIT_CAPACITY, sizeof(type)))
 #define list_destroy(list) estd_list_destroy(((list_t*)(list)))
-#define list_add(list, item) ((bool)estd_list_grow(((list_t**)&(list)), 1), (list)[list_len(list)] = (item))
+#define list_add(list, item) ((bool)estd_list_grow(((list_t**)&(list)), 1), (list)[estd_list_len_grow((list_t*)(list), 1)] = (item))
 #define list_remove(list, index) ((bool)estd_list_remove(((list_t*)(list)), (index)))
 #define list_len(list) ((size_t)estd_list_len((list_t*)(list)))
 
@@ -28,5 +28,6 @@ void estd_list_destroy(list_t* list);
 bool estd_list_grow(list_t** list, size_t size);
 bool estd_list_remove(list_t* list, size_t index);
 size_t estd_list_len(list_t* list);
+size_t estd_list_len_grow(list_t* list, size_t size);
 
 #endif
