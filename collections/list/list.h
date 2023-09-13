@@ -26,7 +26,7 @@ typedef char byte;
 list_t* estd_list_create(size_t capacity, size_t item_size);
 void estd_list_destroy(list_t* list);
 bool estd_list_grow(list_t** list, size_t size);
-bool estd_list_remove(list_t** list, size_t index);
+bool estd_list_remove(list_t* list, size_t index);
 size_t estd_list_len(list_t* list);
 
 #endif
