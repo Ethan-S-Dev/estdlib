@@ -3,7 +3,7 @@
 
 int main()
 {
-    int* numbers_list = list_create_cap(int, 6);
+    int* numbers_list = list_create(int);
 
     list_add(numbers_list, 5);
     list_add(numbers_list, 4);
