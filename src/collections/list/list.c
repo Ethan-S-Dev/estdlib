@@ -30,12 +30,17 @@ list_t* estd_list_create(size_t item_size){
     return estd_list_create_cap(LIST_INIT_CAPACITY, item_size);
 }
 
-list_t* estd_list_create_from_iter(iterator_t* iterator){
+static void list_add_item(void* list_p, void* item){
+    list_t* list = (list_t*)list_p;
+    estd_list_add(list, item);
+}
+
+list_t* estd_list_create_iter(iterator_t* iterator){
     list_t* list = iterator->count == NULL ? 
                     estd_list_create(iterator->item_size) :
                     estd_list_create_cap(estd_iter_count(iterator), iterator->item_size);
 
-    estd_iter_for_each_args(iterator, estd_list_add, list);
+    estd_iter_for_each_args(iterator, list_add_item, list);
     return list;
 }
 
