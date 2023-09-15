@@ -15,7 +15,9 @@
 			"xutility": "c",
 			"stdlib.h": "c",
 			"list": "c",
-			"stdbool.h": "c"
+			"stdbool.h": "c",
+			"initializer_list": "c",
+			"iterator": "c"
 		},
 		"cSpell.words": [
 			"ESTD"
