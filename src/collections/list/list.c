@@ -66,6 +66,7 @@ static bool list_grow_if_needed(list_t* list, size_t size){
         return false;
 
     list->items = new_items;
+    list->capacity = needed_capacity;
     return true;
 }
 
@@ -76,6 +77,7 @@ bool estd_list_add(list_t* list, void* item){
     byte* items_bytes = (byte*)list->items;
     size_t offset = list->length * list->item_size;
     memcpy(items_bytes + offset, item, list->item_size);
+    list->length++;
     return true;
 }
 

@@ -11,6 +11,11 @@ static void print_number(void* number_p){
     printf("this is number: %d\n", number);
 }
 
+static void print_person(void* person_p) {
+    person_t* person = (person_t*)person_p;
+    printf("this is people age: %d\n", person->age);
+}
+
 static bool grater_then(void* then_p, void* item_p){
     int then = *(int*)then_p;
     int item = *(int*)item_p;
@@ -20,6 +25,7 @@ static bool grater_then(void* then_p, void* item_p){
 static void* to_person(void* number_p){
     int number = *(int*)number_p;
     person_t* p = malloc(sizeof(person_t));
+    if(p == NULL) return NULL;
     p->age = number;
     return p;
 }
@@ -47,9 +53,11 @@ int main()
     iterator_t filtered = estd_iter_filter_args(&numbers, grater_then, &four);
     iterator_t people = estd_iter_map(&filtered, to_person, sizeof(person_t));
     
-    foreach(&people, print_number);
+    foreach(&people, print_person);
 
     list_t* people_list = estd_list_create_iter(&people);
+
+    printf("number of people: %zu\n", list_len(people_list));
 
     estd_iter_dispose(&numbers);
     estd_iter_dispose(&filtered);
