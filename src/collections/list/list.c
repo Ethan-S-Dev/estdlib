@@ -44,13 +44,13 @@ list_t* estd_list_create_iter(iterator_t* iterator){
 
     if(list == NULL) return NULL;
 
-    foreach_void_pointer(item, iterator)
-    {
-        if(!estd_list_add(list, item)){
-            estd_list_destroy(list);
-            return NULL;
-        }
-    }
+     foreach_pointer(item, iterator)
+     {
+         if(!estd_list_add(list, item)){
+             estd_list_destroy(list);
+             return NULL;
+         }
+     }
 
     return list;
 }
@@ -124,7 +124,7 @@ typedef struct list_iterator_t {
 
 static bool list_iterator_move_next(iterator_t* iterator){
     list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    if(list_iterator->current_index >= list_iterator->list->length)
+    if(list_iterator->current_index == list_iterator->list->length)
         return false;
 
     list_iterator->current_index++;

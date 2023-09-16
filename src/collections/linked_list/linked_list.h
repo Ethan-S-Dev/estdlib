@@ -12,7 +12,7 @@
 #define ESTD_FREE free
 #endif
 
-typedef struct linked_list_t linekd_list_t;
+typedef struct linked_list_t linked_list_t;
 
 linked_list_t* estd_linked_list_create(size_t item_size);
 void estd_linked_list_destroy(linked_list_t* list);

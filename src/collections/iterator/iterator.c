@@ -1,4 +1,5 @@
 #include "iterator.h"
+#include <assert.h>
 
 iterator_t estd_iter_create_empty(){
     iterator_t iter = {
@@ -14,7 +15,6 @@ iterator_t estd_iter_create_empty(){
 
     return iter;
 }
-
 bool estd_iter_is_empty(iterator_t* iter){
     return iter->internal_iterator == NULL &&
         iter->item_size == 0 &&
@@ -25,6 +25,21 @@ bool estd_iter_is_empty(iterator_t* iter){
         iter->count == NULL;
 }
 
+bool estd_iter_move_next(iterator_t* iter){
+    assert(iter->move_next != NULL);
+    bool result = iter->move_next(iter);
+    return result;
+}
+void* estd_iter_current(iterator_t* iter){
+    assert(iter->current != NULL);
+    void* current = iter->current(iter);
+    return current;
+}
+void* estd_iter_reset(iterator_t* iter){
+    assert(iter->reset != NULL);
+    iter->reset(iter);
+    return NULL;
+}
 size_t estd_iter_count(iterator_t* iter){
     if(iter->count != NULL) return iter->count(iter);
 
@@ -37,7 +52,6 @@ size_t estd_iter_count(iterator_t* iter){
 
     return count;
 }
-
 void estd_iter_dispose(iterator_t* iter){
     if(iter->dispose == NULL) return;
     iter->dispose(iter);

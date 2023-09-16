@@ -1,68 +1,68 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "../src/collections/estd_collections.h"
 
-typedef struct person_t{
-    int age;
-} person_t;
+#define ANSI_FONT_COL_RESET     "\x1b[0m"
+#define FONT_COL_RED     "\e[38;2;200;0;0m" // where rrr;ggg;bbb in 38;2;rrr;ggg;bbbm can go from 0 to 255 respectively
+#define FONT_COL_GREEN   "\e[38;2;0;200;0m" // where rrr;ggg;bbb in 38;2;rrr;ggg;bbbm can go from 0 to 255 respectively
 
-static void print_number(void* number_p){
-    int number = *(int*)number_p;
-    printf("this is number: %d\n", number);
+static size_t _number_of_tests = 0;
+static size_t _number_of_tests_passed = 0;
+static size_t _number_of_tests_failed = 0;
+
+typedef bool (*test_func)();
+void run_test(test_func test, char* name){
+    _number_of_tests++;
+    printf("running test: %s\n", name);
+    if(test()) return;
+
+    _number_of_tests_failed++;
+    printf(FONT_COL_RED "test: %s failed!" ANSI_FONT_COL_RESET "\n", name);  
 }
 
-static void print_person(void* person_p) {
-    person_t* person = (person_t*)person_p;
-    printf("this is people age: %d\n", person->age);
+bool test_list_create(){
+    list_t* list = estd_list_create(sizeof(int));
+    bool result = list != NULL;
+    estd_list_destroy(list);
+    return result;
 }
 
-static bool grater_then(void* then_p, void* item_p){
-    int then = *(int*)then_p;
-    int item = *(int*)item_p;
-    return item > then;
-}
+bool test_list_add(){
+    list_t* list = estd_list_create(sizeof(int));
+    if(list == NULL)
+        return false;
 
-static void* to_person(void* number_p){
-    int number = *(int*)number_p;
-    person_t* p = malloc(sizeof(person_t));
-    if(p == NULL) return NULL;
-    p->age = number;
-    return p;
+    list_add(int, list, 5);
+    list_add(int ,list, 4);
+    list_add(int, list, 2);
+    list_add(int, list, 6);
+    list_add(int, list, 9);
+    list_add(int, list, 4);
+
+    bool result = list_len(list) == 6;
+    result = result && list_items(int, list)[0] == 5;
+    result = result && list_items(int, list)[1] == 4;
+    result = result && list_items(int, list)[2] == 2;
+    result = result && list_items(int, list)[3] == 6;
+    result = result && list_items(int, list)[4] == 9;
+    result = result && list_items(int, list)[5] == 4;
+
+    estd_list_destroy(list);
+    return result;
 }
 
 int main()
 {
-    list_t* numbers_list = estd_list_create(sizeof(int));
+    printf("Running list tests...\n");
+    run_test(test_list_create, "test_list_create");
+    run_test(test_list_add, "test_list_add");
 
-    list_add(int, numbers_list, 5);
-    list_add(int ,numbers_list, 4);
-    list_add(int, numbers_list, 2);
-    list_add(int, numbers_list, 6);
-    list_add(int, numbers_list, 9);
-    list_add(int, numbers_list, 4);
+    if(_number_of_tests_passed > 0)
+        printf(FONT_COL_GREEN "Passed: %zu/%zu tests." ANSI_FONT_COL_RESET "\n", _number_of_tests_passed, _number_of_tests);
 
-    int element = list_items(int, numbers_list)[4];
+    if(_number_of_tests_failed > 0)
+        printf(FONT_COL_RED "Failed: %zu/%zu tests." ANSI_FONT_COL_RESET "\n", _number_of_tests_failed, _number_of_tests);
 
-    printf("element at index 4: %d\n", element);
-
-    iterator_t numbers = estd_list_iterator(numbers_list);
-
-    foreach(&numbers, print_number);
-
-    int four = 4;
-    iterator_t filtered = estd_iter_filter_args(&numbers, grater_then, &four);
-    iterator_t people = estd_iter_map(&filtered, to_person, sizeof(person_t));
-    
-    foreach(&people, print_person);
-
-    list_t* people_list = estd_list_create_iter(&people);
-
-    printf("number of people: %zu\n", list_len(people_list));
-
-    estd_iter_dispose(&numbers);
-    estd_iter_dispose(&filtered);
-    estd_iter_dispose(&people);
-    estd_list_destroy(numbers_list);
-    estd_list_destroy(people_list);
-    return 0;
+    printf("List tests finished!\n");
 }
