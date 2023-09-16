@@ -11,7 +11,19 @@
 #define ESTD_MALLOC(size) malloc(size)
 #endif
 
-#define foreach(iter, action) estd_iter_for_each(iter, action)
+#define _reset_foreach(iterator) ((iterator)->reset((iterator)), {0})
+
+#define foreach(type, varName, iterator) for (          \
+    type v = _reset_foreach(iterator),                  \
+    varName = *(type*)(iterator)->current((iterator));  \
+    (iterator)->move_next((iterator));                  \
+    varName = *(type*)(iterator)->current((iterator)))
+
+#define foreach_void_pointer(varName, iterator) for (   \
+    void* v = _reset_foreach(iterator),                 \
+    varName = (iterator)->current((iterator));          \
+    (iterator)->move_next((iterator));                  \
+    varName = (iterator)->current((iterator)))
 
 typedef struct iterator_t {
     void* internal_iterator;
@@ -24,6 +36,8 @@ typedef struct iterator_t {
     void (*dispose)(struct iterator_t* self);
 } iterator_t;
 
+iterator_t estd_iter_create_empty();
+bool estd_iter_is_empty(iterator_t* iter);
 size_t estd_iter_count(iterator_t* iter);
 void estd_iter_dispose(iterator_t* iter);
 void estd_iter_for_each(iterator_t* iter, void (*action)(void*));

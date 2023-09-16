@@ -1,5 +1,6 @@
 #include "list.h"
 #include <string.h>
+#include <assert.h>
 
 typedef char byte;
 
@@ -11,16 +12,22 @@ typedef struct list_t{
 } list_t;
 
 list_t* estd_list_create_cap(size_t capacity, size_t item_size){
-    
-        capacity = LIST_INIT_CAPACITY;
+    capacity = LIST_INIT_CAPACITY;
 
     list_t* list = ESTD_MALLOC(sizeof(list_t));
+    if(list == NULL) return NULL;
+
     list->capacity = capacity;
     list->item_size = item_size;
     list->length = 0;
 
-    if(capacity > 0)
+    if(capacity > 0){
         list->items = ESTD_MALLOC(capacity * item_size);
+        if(list->items == NULL){
+            ESTD_FREE(list);
+            return NULL;
+        }
+    }
     else
         list->items = NULL;
 
@@ -30,17 +37,21 @@ list_t* estd_list_create(size_t item_size){
     return estd_list_create_cap(LIST_INIT_CAPACITY, item_size);
 }
 
-static void list_add_item(void* list_p, void* item){
-    list_t* list = (list_t*)list_p;
-    estd_list_add(list, item);
-}
-
 list_t* estd_list_create_iter(iterator_t* iterator){
     list_t* list = iterator->count == NULL ? 
                     estd_list_create(iterator->item_size) :
                     estd_list_create_cap(estd_iter_count(iterator), iterator->item_size);
 
-    estd_iter_for_each_args(iterator, list_add_item, list);
+    if(list == NULL) return NULL;
+
+    foreach_void_pointer(item, iterator)
+    {
+        if(!estd_list_add(list, item)){
+            estd_list_destroy(list);
+            return NULL;
+        }
+    }
+
     return list;
 }
 
@@ -82,8 +93,7 @@ bool estd_list_add(list_t* list, void* item){
 }
 
 void* estd_list_get(list_t* list, size_t index){
-    if(index >= list->length)
-        return NULL;
+    assert(index < list->length);
 
     byte* items_bytes = (byte*)list->items;
     size_t offset = index * list->item_size;
@@ -91,8 +101,7 @@ void* estd_list_get(list_t* list, size_t index){
 }
 
 bool estd_list_remove(list_t* list, size_t index){
-    if(index >= list->length)
-        return false;
+    assert(index < list->length);
 
     byte* items_bytes = (byte*)list->items;
     size_t offset = index * list->item_size;
@@ -115,6 +124,9 @@ typedef struct list_iterator_t {
 
 static bool list_iterator_move_next(iterator_t* iterator){
     list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
+    if(list_iterator->current_index >= list_iterator->list->length)
+        return false;
+
     list_iterator->current_index++;
     return list_iterator->current_index < list_iterator->list->length;
 }
@@ -126,7 +138,7 @@ static void* list_iterator_current(iterator_t* iterator){
 
 static void list_iterator_reset(iterator_t* iterator){
     list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    list_iterator->current_index = 0;
+    list_iterator->current_index = -1;
 }
 
 static size_t list_iterator_count(iterator_t* iterator){
@@ -141,12 +153,15 @@ static void list_iterator_dispose(iterator_t* iterator){
 
 iterator_t estd_list_iterator(list_t* list){
     list_iterator_t* list_iterator = ESTD_MALLOC(sizeof(list_iterator_t));
+    if(list_iterator == NULL) return estd_iter_create_empty();
+
     list_iterator->list = list;
-    list_iterator->current_index = 0;
+    list_iterator->current_index = -1;
 
     iterator_t iterator = {
         .internal_iterator = list_iterator,
         .item_size = list->item_size,
+
         .move_next = list_iterator_move_next,
         .current = list_iterator_current,
         .reset = list_iterator_reset,
