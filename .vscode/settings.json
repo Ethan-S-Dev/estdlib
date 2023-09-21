@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "enumerable.h": "c",
+        "enumerator.h": "c",
+        "disposable.h": "c",
+        "assert.h": "c",
+        "map.h": "c",
+        "linked_list.h": "c",
+        "iterator.h": "c",
+        "stdbool.h": "c",
+        "iterable.h": "c",
+        "stdlib.h": "c",
+        "filter.h": "c",
+        "stdarg.h": "c"
+    }
+}

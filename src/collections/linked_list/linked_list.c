@@ -1,6 +1,6 @@
-#include "linked_list.h"
 #include <assert.h>
 #include <string.h>
+#include "linked_list.h"
 
 typedef struct linked_list_node_t {
     void *data;
@@ -199,59 +199,37 @@ typedef struct linked_list_iterator_t {
     linked_list_node_t *current;
 } linked_list_iterator_t;
 
-static bool linked_list_iter_move_next(iterator_t *iter){
-    linked_list_iterator_t *internal_iter = iter->internal_iterator;
-
-    if(internal_iter->current == NULL){
-        internal_iter->current = internal_iter->linked_list->head;
-        return internal_iter->current != NULL;
+static bool linked_list_iterator_move_next(linked_list_iterator_t *self){
+    if(self->current == NULL){
+        self->current = self->linked_list->head;
+        return self->current != NULL;
     }
 
-    linked_list_node_t *next = internal_iter->current->next;
+    linked_list_node_t *next = self->current->next;
     if(next == NULL) return false;
 
-    internal_iter->current = next;
+    self->current = next;
     return true;
 }
-
-static void* linked_list_iter_current(iterator_t *iter){
-    linked_list_iterator_t *internal_iter = iter->internal_iterator;
-
-    return internal_iter->current->data;
+static void* linked_list_iterator_get_current(linked_list_iterator_t *self){
+    return self->current->data;
+}
+static void linked_list_iterator_reset(linked_list_iterator_t *self){
+    self->current = NULL;
+}
+static void linked_list_iterator_dispose(linked_list_iterator_t *self){
+    ESTD_FREE(self);
 }
 
-static void linked_list_iter_reset(iterator_t *iter){
-    linked_list_iterator_t *internal_iter = iter->internal_iterator;
-    internal_iter->current = NULL;
+static implement_disposable(linked_list_iterator_t, estd_linked_list_iterator_disposable, linked_list_iterator_dispose);
+
+static implement_iterator(linked_list_iterator_t, estd_linked_list_iterator_iterator, linked_list_iterator_get_current, linked_list_iterator_move_next, linked_list_iterator_reset, estd_linked_list_iterator_disposable)
+
+static iterator estd_linked_list_get_iterator(linked_list_t *list){
+    linked_list_iterator_t *iterator = ESTD_MALLOC(sizeof(linked_list_iterator_t));
+    iterator->linked_list = list;
+    iterator->current = NULL;
+    return estd_linked_list_iterator_iterator(iterator);
 }
 
-static size_t linked_list_iter_count(iterator_t *iter){
-    linked_list_iterator_t *internal_iter = iter->internal_iterator;
-    return internal_iter->linked_list->length;
-}
-
-static void linked_list_iter_dispose(iterator_t *iter){
-    linked_list_iterator_t *internal_iter = iter->internal_iterator;
-    ESTD_FREE(internal_iter);
-}
-
-iterator_t estd_linked_list_iter(linked_list_t* list){
-    linked_list_iterator_t *iter = ESTD_MALLOC(sizeof(linked_list_iterator_t));
-    if(iter == NULL) return estd_iter_create_empty();
-
-    iter->linked_list = list;
-    iter->current = list->head;
-    
-    iterator_t iterator = {
-        .internal_iterator = iter,
-        .item_size = list->item_size,
-
-        .move_next = linked_list_iter_move_next,
-        .current = linked_list_iter_current,
-        .reset = linked_list_iter_reset,
-        .count = linked_list_iter_count,
-        .dispose = linked_list_iter_dispose
-    };
-
-    return iterator;
-}
+implement_iterable(linked_list_t, estd_linked_list_iterable, estd_linked_list_get_iterator);

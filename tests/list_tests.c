@@ -15,10 +15,13 @@ typedef bool (*test_func)();
 void run_test(test_func test, char* name){
     _number_of_tests++;
     printf("running test: %s\n", name);
-    if(test()) return;
+    if(test()){
+        _number_of_tests_passed++;
+        return;
+    }
 
     _number_of_tests_failed++;
-    printf(FONT_COL_RED "test: %s failed!" ANSI_FONT_COL_RESET "\n", name);  
+    printf(FONT_COL_RED "test: %s failed!" ANSI_FONT_COL_RESET "\n", name); 
 }
 
 bool test_list_create(){
@@ -52,6 +55,13 @@ bool test_list_add(){
     return result;
 }
 
+void* mod_5(void* number){
+    int num = *(int*)number;
+    int* mod5_num_ptr = malloc(sizeof(int));
+    *mod5_num_ptr = num % 5;
+    return mod5_num_ptr;
+}
+
 int main()
 {
     printf("Running list tests...\n");
@@ -63,6 +73,23 @@ int main()
 
     if(_number_of_tests_failed > 0)
         printf(FONT_COL_RED "Failed: %zu/%zu tests." ANSI_FONT_COL_RESET "\n", _number_of_tests_failed, _number_of_tests);
+
+    list_t* list = estd_list_create(sizeof(int));
+    list_add(int, list, 5);
+    list_add(int ,list, 4);
+    list_add(int, list, 2);
+    list_add(int, list, 6);
+    list_add(int, list, 9);
+    list_add(int, list, 4);
+
+    foreach(int, number, estd_list_iterable(list)){
+        printf("number[%zu]: %d\n", iteration.index, iteration.number);
+    }
+
+    iterable items = estd_list_iterable(list);
+    iterator mapped = estd_map_iterator(estd_iterable_get_iterator(items), mod_5);
+    
+    estd_list_destroy(list);
 
     printf("List tests finished!\n");
 }

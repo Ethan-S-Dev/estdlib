@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../iterator/iterator.h"
+#include "../iterable/iterable.h"
 
 #ifndef ESTD_MALLOC
 #define ESTD_MALLOC malloc
@@ -27,5 +27,5 @@ bool estd_linked_list_remove(linked_list_t* list, size_t index);
 
 void* estd_linked_list_get(linked_list_t* list, size_t index);
 
-iterator_t estd_linked_list_iter(linked_list_t* list);
+iterable estd_linked_list_iterable(linked_list_t* list);
 #endif

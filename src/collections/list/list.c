@@ -1,6 +1,6 @@
-#include "list.h"
 #include <string.h>
 #include <assert.h>
+#include "list.h"
 
 typedef char byte;
 
@@ -11,6 +11,9 @@ typedef struct list_t{
     void* items;
 } list_t;
 
+list_t* estd_list_create(size_t item_size){
+    return estd_list_create_cap(LIST_INIT_CAPACITY, item_size);
+}
 list_t* estd_list_create_cap(size_t capacity, size_t item_size){
     capacity = LIST_INIT_CAPACITY;
 
@@ -33,24 +36,17 @@ list_t* estd_list_create_cap(size_t capacity, size_t item_size){
 
     return list;
 }
-list_t* estd_list_create(size_t item_size){
-    return estd_list_create_cap(LIST_INIT_CAPACITY, item_size);
-}
-
-list_t* estd_list_create_iter(iterator_t* iterator){
-    list_t* list = iterator->count == NULL ? 
-                    estd_list_create(iterator->item_size) :
-                    estd_list_create_cap(estd_iter_count(iterator), iterator->item_size);
-
+list_t* estd_list_create_iterable(iterable iter, size_t item_size){
+    list_t* list = estd_list_create(item_size);
     if(list == NULL) return NULL;
 
-     foreach_pointer(item, iterator)
-     {
-         if(!estd_list_add(list, item)){
-             estd_list_destroy(list);
-             return NULL;
-         }
-     }
+    foreach_pointer(item, iter)
+    {
+        if(!estd_list_add(list, iteration.item)){
+            estd_list_destroy(list);
+            return NULL;
+        }
+    }
 
     return list;
 }
@@ -122,52 +118,32 @@ typedef struct list_iterator_t {
     size_t current_index;
 } list_iterator_t;
 
-static bool list_iterator_move_next(iterator_t* iterator){
-    list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    if(list_iterator->current_index == list_iterator->list->length)
+static bool list_iterator_move_next(list_iterator_t* self){
+    if(self->current_index == self->list->length)
         return false;
 
-    list_iterator->current_index++;
-    return list_iterator->current_index < list_iterator->list->length;
+    self->current_index++;
+    return self->current_index < self->list->length;
+}
+static void* list_iterator_get_current(list_iterator_t* self){
+    return estd_list_get(self->list, self->current_index);
+}
+static void list_iterator_reset(list_iterator_t* self){
+    self->current_index = -1;
+}
+static void list_iterator_disposable_dispose(list_iterator_t* self){
+    ESTD_FREE(self);
 }
 
-static void* list_iterator_current(iterator_t* iterator){
-    list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    return estd_list_get(list_iterator->list, list_iterator->current_index);
+static implement_disposable(list_iterator_t, estd_list_iterator_disposable, list_iterator_disposable_dispose);
+
+static implement_iterator(list_iterator_t, estd_list_iterator_iterator, list_iterator_get_current, list_iterator_move_next, list_iterator_reset, estd_list_iterator_disposable);
+
+static iterator estd_list_get_iterator(list_t* list){
+    list_iterator_t* iter = ESTD_MALLOC(sizeof(list_iterator_t));
+    iter->current_index = -1;
+    iter->list = list;
+    return estd_list_iterator_iterator(iter);
 }
 
-static void list_iterator_reset(iterator_t* iterator){
-    list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    list_iterator->current_index = -1;
-}
-
-static size_t list_iterator_count(iterator_t* iterator){
-    list_iterator_t* list_iterator = (list_iterator_t*)iterator->internal_iterator;
-    return list_iterator->list->length;
-}
-
-static void list_iterator_dispose(iterator_t* iterator){
-    list_iterator_t *list_iter = (list_iterator_t *)iterator->internal_iterator;
-    ESTD_FREE(list_iter);
-}
-
-iterator_t estd_list_iterator(list_t* list){
-    list_iterator_t* list_iterator = ESTD_MALLOC(sizeof(list_iterator_t));
-    if(list_iterator == NULL) return estd_iter_create_empty();
-
-    list_iterator->list = list;
-    list_iterator->current_index = -1;
-
-    iterator_t iterator = {
-        .internal_iterator = list_iterator,
-        .item_size = list->item_size,
-
-        .move_next = list_iterator_move_next,
-        .current = list_iterator_current,
-        .reset = list_iterator_reset,
-        .count = list_iterator_count,
-        .dispose = list_iterator_dispose
-    };
-
-    return iterator;
-}
+implement_iterable(list_t, estd_list_iterable, estd_list_get_iterator);
