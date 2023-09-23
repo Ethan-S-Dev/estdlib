@@ -24,3 +24,4 @@ disposable estd_iterator_get_disposable(iterator iter){
     disposable disposable = iter.iterator_f->get_disposable(iter.self);
     return disposable;
 }
+

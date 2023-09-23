@@ -25,14 +25,14 @@ void run_test(test_func test, char* name){
 }
 
 bool test_list_create(){
-    list_t* list = estd_list_create(sizeof(int));
+    estd_list* list = estd_list_create(sizeof(int));
     bool result = list != NULL;
     estd_list_destroy(list);
     return result;
 }
 
 bool test_list_add(){
-    list_t* list = estd_list_create(sizeof(int));
+    estd_list* list = estd_list_create(sizeof(int));
     if(list == NULL)
         return false;
 
@@ -74,7 +74,7 @@ int main()
     if(_number_of_tests_failed > 0)
         printf(FONT_COL_RED "Failed: %zu/%zu tests." ANSI_FONT_COL_RESET "\n", _number_of_tests_failed, _number_of_tests);
 
-    list_t* list = estd_list_create(sizeof(int));
+    estd_list* list = estd_list_create(sizeof(int));
     list_add(int, list, 5);
     list_add(int ,list, 4);
     list_add(int, list, 2);
@@ -86,10 +86,12 @@ int main()
         printf("number[%zu]: %d\n", iteration.index, iteration.number);
     }
 
-    iterable items = estd_list_iterable(list);
-    iterator mapped = estd_map_iterator(estd_iterable_get_iterator(items), mod_5);
+    iterable numbers = estd_list_iterable(list);
+
+    foreach(int, number, numbers){
+        printf("number[%zu]: %d\n", iteration.index, iteration.number);
+    }
     
     estd_list_destroy(list);
-
     printf("List tests finished!\n");
 }

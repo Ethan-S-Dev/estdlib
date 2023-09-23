@@ -226,10 +226,11 @@ static implement_disposable(linked_list_iterator_t, estd_linked_list_iterator_di
 static implement_iterator(linked_list_iterator_t, estd_linked_list_iterator_iterator, linked_list_iterator_get_current, linked_list_iterator_move_next, linked_list_iterator_reset, estd_linked_list_iterator_disposable)
 
 static iterator estd_linked_list_get_iterator(linked_list_t *list){
-    linked_list_iterator_t *iterator = ESTD_MALLOC(sizeof(linked_list_iterator_t));
-    iterator->linked_list = list;
-    iterator->current = NULL;
-    return estd_linked_list_iterator_iterator(iterator);
+    linked_list_iterator_t *iter = ESTD_MALLOC(sizeof(linked_list_iterator_t));
+    if(iter == NULL) return (iterator){0};
+    iter->linked_list = list;
+    iter->current = NULL;
+    return estd_linked_list_iterator_iterator(iter);
 }
 
 implement_iterable(linked_list_t, estd_linked_list_iterable, estd_linked_list_get_iterator);

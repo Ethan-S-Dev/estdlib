@@ -1,7 +1,9 @@
-#ifndef MAP_ITERATOR_H
-#define MAP_ITERATOR_H
+#ifndef ESTD_H
+#define ESTD_H
 
-#include "../iterator.h"
+#include <stdio.h>
+
+#define ESTD_VERSION "0.0.1"
 
 #ifndef ESTD_MALLOC
 #define ESTD_MALLOC malloc
@@ -16,5 +18,4 @@
 #define ESTD_CALLOC calloc
 #endif
 
-iterator estd_map_iterator(iterator enumerable, void* (*mapper)(void* item));
-#endif
+#endif // ESTD_H

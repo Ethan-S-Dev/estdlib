@@ -21,18 +21,19 @@
 #define LIST_GROWTH_FACTOR 2
 #define LIST_SHRINK_FACTOR 0.25
 
-#define list_add(type, list, item) do{type value = (item); bool result = estd_list_add((list), &value);}while(0)
-#define list(type, list) ((type*)estd_list_get((list), 0))
+#define list_add(type, list, item) (bool)estd_list_add((list), (type*)(type[1]){(item)})
+#define list_items(type, list) ((type*)estd_list_get((list), 0))
+#define list_len estd_list_len
 
-typedef struct list_t list_t;
+typedef struct estd_list estd_list;
 
-list_t* estd_list_create(size_t item_size);
-list_t* estd_list_create_cap(size_t capacity, size_t item_size);
-list_t* estd_list_create_iterable(iterable iter, size_t item_size);
-void estd_list_destroy(list_t* list);
-bool estd_list_add(list_t* list, void* item);
-void* estd_list_get(list_t* list, size_t index);
-bool estd_list_remove(list_t* list, size_t index);
-size_t estd_list_len(list_t* list);
-iterable estd_list_iterable(list_t* list);
+estd_list* estd_list_create(size_t item_size);
+estd_list* estd_list_create_cap(size_t capacity, size_t item_size);
+estd_list* estd_list_create_iterable(iterable iter, size_t item_size);
+void estd_list_destroy(estd_list* list);
+bool estd_list_add(estd_list* list, void* item);
+void* estd_list_get(estd_list* list, size_t index);
+bool estd_list_remove(estd_list* list, size_t index);
+size_t estd_list_len(estd_list* list);
+iterable estd_list_iterable(estd_list* list);
 #endif

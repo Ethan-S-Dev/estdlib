@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include "../../estd.h"
 #include "../../disposable/disposable.h"
 
 typedef struct iterator_f{
@@ -15,7 +16,6 @@ typedef struct iterator_f{
 
 typedef struct iterator{
     void* self;
-    iterator* inner_iterator;
     iterator_f const* iterator_f;
 } iterator;
 

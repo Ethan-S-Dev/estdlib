@@ -11,6 +11,8 @@
         "iterable.h": "c",
         "stdlib.h": "c",
         "filter.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }

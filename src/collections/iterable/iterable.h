@@ -15,12 +15,12 @@ typedef struct iterable{
     iterable_f const* iterable_f;
 } iterable;
 
-#define data(type, varName) struct { type varName; bool has_value; size_t index; iterator iter }
-#define data_void(varName) struct { void* varName; bool has_value; size_t index; iterator iter }
+#define iteration_data(type, varName) struct { type varName; bool has_value; size_t index; iterator iter; }
+#define iteration_data_void(varName) struct { void* varName; bool has_value; size_t index; iterator iter; }
                                                                                       
 #define foreach(type, varName, iterable)                                            \
 for (                                                                               \
-    data(type, varName) iteration = {                                               \
+    iteration_data(type, varName) iteration = {                                     \
         .varName = (type){0},                                                       \
         .has_value = false,                                                         \
         .index = 0,                                                                 \
@@ -44,7 +44,7 @@ for (                                                                           
 
 #define foreach_pointer(varName, iterable)                                          \
 for (                                                                               \
-    data_void(varName) iteration = {                                                \
+    iteration_data_void(varName) iteration = {                                      \
             .varName = (void*){0},                                                  \
             .has_value = false,                                                     \
             .index = 0,                                                             \
@@ -79,4 +79,5 @@ iterable Name(T* x)                                                             
 }
 
 iterator estd_iterable_get_iterator(iterable iterable);
+iterable estd_iterator_as_iterable(iterator iterator);
 #endif
